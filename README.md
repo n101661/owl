@@ -14,7 +14,7 @@ There are two documents in the configuration file:
 
 ```yaml
 ---
-type: http
+type: web hook
 ---
 - name: example_http_job
   cron:
@@ -23,7 +23,6 @@ type: http
     delay_if_still_running: true
   config:
     uri: http://localhose/example
-    method: GET
     parameters:
       - name: rid
         value: $request_id
@@ -37,7 +36,7 @@ Fixed fields:
 
 | Field Name | Type | Description |
 | --- | --- | --- |
-| type | string | **REQUIRED**. The available values are '*http*' and '*file*'. |
+| type | string | **REQUIRED**. The available values are '*web hook*' and '*file*'. |
 
 ### Job Document
 
@@ -66,8 +65,7 @@ Fixed fields:
 | Field Name | Type | Description |
 | --- | --- | --- |
 | uri | string | **REQUIRED**. A valid URI with http or https schema. |
-| method | string | The [HTTP request method](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods). Unspecific value means *GET* method. |
-| parameters | \[\][Job Config Value Object](#job-config-value-object) | Send the request if any[^http-params]. |
+| parameters | \[\][Job Config Value Object](#job-config-value-object) | Parameters are sent as a JSON-form request body. |
 
 ### File Job Config Object
 
@@ -92,7 +90,3 @@ Fixed fields:
 | value | comment |
 | --- | --- |
 | `$request_id` | A version 4 [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), it is useful to track the scope. |
-
----
-
-[^http-params]: We need a document for this.
