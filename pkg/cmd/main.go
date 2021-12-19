@@ -12,6 +12,8 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/n101661/owl/pkg/cron"
 )
 
 type Flag struct {
@@ -33,7 +35,7 @@ func main() {
 	zap.ReplaceGlobals(logger)
 	zap.RedirectStdLog(logger)
 
-	crons := newCron()
+	crons := cron.NewCron()
 
 	err = filepath.Walk(flag.Directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -63,12 +65,15 @@ func main() {
 	if err := crons.StartAll(); err != nil {
 		logger.Fatal("failed to start schedules", zap.Error(err))
 	}
+	logger.Info("start cron")
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGTERM, os.Interrupt)
 	<-sig
 
-	crons.Shutdown()
+	if err := crons.Close(); err != nil {
+		logger.Error("failed to close Cron", zap.Error(err))
+	}
 }
 
 func newLogger(development bool) (*zap.Logger, error) {
