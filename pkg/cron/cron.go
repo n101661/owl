@@ -12,7 +12,7 @@ import (
 
 type JobBuilder interface {
 	NewConfig() interface{}
-	Build(cfg interface{}) (cron.Job, error)
+	Build(config interface{}) (cron.Job, error)
 }
 
 type Cron struct {
@@ -48,11 +48,11 @@ func (c *Cron) AddFromFile(r io.Reader) error {
 	if !ok {
 		return fmt.Errorf("unknown executor type [%s]", cfg.Type)
 	}
-	eCfg := builder.NewConfig()
-	if err := decoder.Decode(eCfg); err != nil {
+	jCfg := builder.NewConfig()
+	if err := decoder.Decode(jCfg); err != nil {
 		return err
 	}
-	job, err := builder.Build(eCfg)
+	job, err := builder.Build(jCfg)
 	if err != nil {
 		return fmt.Errorf("failed to create %s executor: %v", cfg.Name, err)
 	}
