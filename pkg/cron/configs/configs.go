@@ -11,13 +11,3 @@ type Cron struct {
 	SkipIfStillRunning  bool   `yaml:"skip_if_still_running"`
 	DelayIfStillRunning bool   `yaml:"delay_if_still_running"`
 }
-
-type HTTP struct {
-	URI        string      `yaml:"uri"`
-	Parameters []HTTPParam `yaml:"parameters"`
-}
-
-type HTTPParam struct {
-	Name  string `yaml:"name"`
-	Value string `yaml:"value"`
-}
