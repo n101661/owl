@@ -3,6 +3,7 @@ package cron
 import (
 	"fmt"
 	"io"
+	"sync"
 
 	cron "github.com/robfig/cron/v3"
 	yaml "gopkg.in/yaml.v3"
@@ -10,30 +11,35 @@ import (
 	"github.com/n101661/owl/pkg/cron/configs"
 )
 
+var (
+	mu       sync.RWMutex
+	registry = map[string]JobBuilder{}
+)
+
+func Register(type_ string, builder JobBuilder) error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if _, ok := registry[type_]; ok {
+		return fmt.Errorf("duplicated type [%s]", type_)
+	}
+	registry[type_] = builder
+	return nil
+}
+
 type JobBuilder interface {
 	NewConfig() interface{}
 	Build(config interface{}) (Job, error)
 }
 
 type Cron struct {
-	registry map[string]JobBuilder
-
 	cron *cron.Cron
 }
 
 func NewCron() *Cron {
 	return &Cron{
-		registry: map[string]JobBuilder{},
-		cron:     cron.New(),
+		cron: cron.New(),
 	}
-}
-
-func (c *Cron) Register(type_ string, builder JobBuilder) error {
-	if _, ok := c.registry[type_]; ok {
-		return fmt.Errorf("duplicated type [%s]", type_)
-	}
-	c.registry[type_] = builder
-	return nil
 }
 
 func (c *Cron) AddFromFile(r io.Reader) error {
@@ -44,7 +50,9 @@ func (c *Cron) AddFromFile(r io.Reader) error {
 		return err
 	}
 
-	builder, ok := c.registry[cfg.Type]
+	mu.RLock()
+	builder, ok := registry[cfg.Type]
+	mu.RUnlock()
 	if !ok {
 		return fmt.Errorf("unknown executor type [%s]", cfg.Type)
 	}
