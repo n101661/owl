@@ -12,7 +12,7 @@ import (
 
 type JobBuilder interface {
 	NewConfig() interface{}
-	Build(config interface{}) (cron.Job, error)
+	Build(config interface{}) (Job, error)
 }
 
 type Cron struct {
@@ -52,11 +52,12 @@ func (c *Cron) AddFromFile(r io.Reader) error {
 	if err := decoder.Decode(jCfg); err != nil {
 		return err
 	}
-	job, err := builder.Build(jCfg)
+	j, err := builder.Build(jCfg)
 	if err != nil {
 		return fmt.Errorf("failed to create %s executor: %v", cfg.Name, err)
 	}
 
+	job := newJob(j)
 	{
 		job = withRecover(job)
 	}
