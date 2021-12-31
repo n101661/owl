@@ -67,7 +67,7 @@ func main() {
 	}
 	logger.Info("start cron")
 
-	sig := make(chan os.Signal)
+	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGTERM, os.Interrupt)
 	<-sig
 

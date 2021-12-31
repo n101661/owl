@@ -81,6 +81,6 @@ func (j *job) Run(ctx context.Context, vs cron.Values) error {
 
 func init() {
 	if err := cron.Register("http", jobBuilder{}); err != nil {
-		panic(fmt.Sprintf("failed to register job builder [http]"))
+		panic("failed to register job builder [http]")
 	}
 }

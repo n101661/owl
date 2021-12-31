@@ -37,7 +37,7 @@ func newJob(j Job) cron.Job {
 		}
 
 		err := j.Run(context.Background(), vs)
-		ms := time.Now().Sub(startTime).Milliseconds()
+		ms := time.Since(startTime).Milliseconds()
 		if err != nil {
 			logger.Error("finish the schedule with error", zap.Int64("time_ms", ms), zap.Error(err))
 		} else {
