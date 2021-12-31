@@ -71,6 +71,7 @@ func main() {
 	signal.Notify(sig, syscall.SIGTERM, os.Interrupt)
 	<-sig
 
+	logger.Info("wait for graceful shutdown")
 	if err := crons.Close(); err != nil {
 		logger.Error("failed to close Cron", zap.Error(err))
 	}
