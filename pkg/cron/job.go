@@ -13,10 +13,13 @@ type Values map[string]string
 
 type Job interface {
 	Name() string
+	Values() Values
 	Run(context.Context, Values) error
 }
 
 func newJob(j Job) cron.Job {
+	parser := newValuesCache(j.Values())
+
 	return cron.FuncJob(func() {
 		startTime := time.Now()
 		rid := xid.New().String()
@@ -28,8 +31,9 @@ func newJob(j Job) cron.Job {
 
 		logger.Info("start the schedule")
 
-		vs := Values{
-			RequestID: rid,
+		vs := j.Values()
+		for _, k := range parser.GetRandomIDKey() {
+			vs[k] = rid
 		}
 
 		err := j.Run(context.Background(), vs)
@@ -40,4 +44,25 @@ func newJob(j Job) cron.Job {
 			logger.Info("finish the schedule", zap.Int64("time_ms", ms))
 		}
 	})
+}
+
+type valuesCache struct {
+	randomIDKey []string
+}
+
+// newValuesCache create a new cache to cache the way to parse values.
+func newValuesCache(vs Values) *valuesCache {
+	randomIDKey := []string{}
+	for k, v := range vs {
+		if v == RandomID {
+			randomIDKey = append(randomIDKey, k)
+		}
+	}
+	return &valuesCache{
+		randomIDKey: randomIDKey,
+	}
+}
+
+func (c *valuesCache) GetRandomIDKey() []string {
+	return c.randomIDKey
 }

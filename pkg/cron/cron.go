@@ -29,7 +29,7 @@ func Register(type_ string, builder JobBuilder) error {
 
 type JobBuilder interface {
 	NewConfig() interface{}
-	Build(config interface{}) (Job, error)
+	Build(name string, config interface{}) (Job, error)
 }
 
 type Cron struct {
@@ -60,7 +60,7 @@ func (c *Cron) AddFromFile(r io.Reader) error {
 	if err := decoder.Decode(jCfg); err != nil {
 		return err
 	}
-	j, err := builder.Build(jCfg)
+	j, err := builder.Build(cfg.Name, jCfg)
 	if err != nil {
 		return fmt.Errorf("failed to create %s executor: %v", cfg.Name, err)
 	}

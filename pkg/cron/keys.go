@@ -1,5 +1,5 @@
 package cron
 
 const (
-	RequestID = "REQUEST_ID"
+	RandomID = "$RANDOM_ID"
 )

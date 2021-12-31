@@ -2,12 +2,13 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
-	cron "github.com/robfig/cron/v3"
+	"github.com/n101661/owl/pkg/cron"
 )
 
 type jobBuilder struct{}
@@ -17,33 +18,50 @@ func (b jobBuilder) NewConfig() interface{} {
 }
 
 type job struct {
-	config Config
+	name string
+	uri  string
+
+	values cron.Values
 }
 
-func (b jobBuilder) Build(configInterface interface{}) (cron.Job, error) {
+func (b jobBuilder) Build(name string, configInterface interface{}) (cron.Job, error) {
 	config, ok := configInterface.(*Config)
 	if !ok {
 		return nil, fmt.Errorf("incompatible config for http job")
 	}
+
+	vs := make(cron.Values, len(config.Parameters))
+	for _, p := range config.Parameters {
+		vs[p.Name] = p.Value
+	}
 	return &job{
-		config: *config,
+		name:   name,
+		uri:    config.URI,
+		values: vs,
 	}, nil
 }
 
-func (j *job) Run() {
-	values := make(map[string]string, len(j.config.Parameters))
-	for _, p := range j.config.Parameters {
-		values[p.Name] = p.Value
+func (j *job) Name() string {
+	return j.name
+}
+
+func (j *job) Values() cron.Values {
+	vs := make(cron.Values, len(j.values))
+	for k, v := range j.values {
+		vs[k] = v
+	}
+	return vs
+}
+
+func (j *job) Run(ctx context.Context, vs cron.Values) error {
+	data, err := json.Marshal(vs)
+	if err != nil {
+		return err
 	}
 
-	data, err := json.Marshal(values)
+	resp, err := http.Post(j.uri, "application/json", bytes.NewReader(data))
 	if err != nil {
-		panic(err) // TODO
-	}
-
-	resp, err := http.Post(j.config.URI, "application/json", bytes.NewReader(data))
-	if err != nil {
-		panic(err) // TODO
+		return err
 	}
 	defer resp.Body.Close()
 
@@ -52,10 +70,17 @@ func (j *job) Run() {
 		if resp.ContentLength > 0 {
 			data, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				panic(err) // TODO
+				return err
 			}
 			msg = string(data)
 		}
-		panic(fmt.Errorf("receive bad status code [%d]: %s", code, msg)) // TODO
+		return fmt.Errorf("receive bad status code [%d]: %s", code, msg)
+	}
+	return nil
+}
+
+func init() {
+	if err := cron.Register("http", jobBuilder{}); err != nil {
+		panic(fmt.Sprintf("failed to register job builder [http]"))
 	}
 }
