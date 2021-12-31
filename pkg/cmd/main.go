@@ -10,10 +10,10 @@ import (
 	"time"
 
 	flags "github.com/jessevdk/go-flags"
+	"github.com/n101661/owl/pkg/cron"
+	_ "github.com/n101661/owl/pkg/cron/jobs/http"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/n101661/owl/pkg/cron"
 )
 
 type Flag struct {
@@ -83,6 +83,7 @@ func newLogger(development bool) (*zap.Logger, error) {
 	} else {
 		cfg = zap.NewProductionConfig()
 		cfg.DisableCaller = true
+		cfg.DisableStacktrace = true
 	}
 	cfg.EncoderConfig.EncodeTime = func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
 		encoder.AppendString(t.Format(time.RFC3339Nano))

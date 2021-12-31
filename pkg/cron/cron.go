@@ -45,7 +45,7 @@ type Cron struct {
 
 func NewCron() *Cron {
 	return &Cron{
-		cron: cron.New(),
+		cron: cron.New(cron.WithSeconds()),
 	}
 }
 
