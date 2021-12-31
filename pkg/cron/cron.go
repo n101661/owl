@@ -27,6 +27,13 @@ func Register(type_ string, builder JobBuilder) error {
 	return nil
 }
 
+func Clear() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	registry = make(map[string]JobBuilder)
+}
+
 type JobBuilder interface {
 	NewConfig() interface{}
 	Build(name string, config interface{}) (Job, error)
