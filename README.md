@@ -1,5 +1,7 @@
 # Owl
 
+[TOC]
+
 Owl is a server to schedule jobs.
 Owl takes advantage of CRON expression to config jobs.
 
@@ -7,6 +9,87 @@ Owl supports:
 
 - [HTTP Job](#http-job)
 - [File Job](#file-job)
+
+## Job
+
+### HTTP Job
+
+Each HTTP job will send a POST request to the specified URI,
+headers of the request are:
+
+| Header | Value |
+| --- | --- |
+| Content-Type | application/json |
+
+and the config of [Job Parameter Object](#job-parameter-object) will be parsed as a JSON-form request body.
+
+For example, there is a config like:
+
+```yaml
+---
+name: example-http-job
+type: http
+cron:
+  express: "* * * * * *"
+  skip_if_still_running: false
+  delay_if_still_running: true
+---
+uri: http://localhost/example
+parameters:
+  - name: rid
+    value: $RANDOM_ID
+  - name: name
+    value: tester
+  - name: param
+    value: "123"
+```
+
+parameters will be parse as JSON like:
+
+```json
+{
+  "rid": "$RANDOM_ID",
+  "name": "tester",
+  "param": "123"
+}
+```
+
+and send to `http://localhost/example`.
+
+**CAUTION**: If there are 2 or above of the **SAME** name of [Job Parameter Object](#job-parameter-object), Owl would take the **LAST** one value.
+
+### File Job
+
+File job runs an executable file with flags(if any).
+
+The config of [Job Parameter Object](#job-parameter-object) will be parsed as flags.
+
+For example, there is a config like:
+
+```yaml
+---
+name: example-files-job
+type: files
+cron:
+  express: "* * * * * *"
+  skip_if_still_running: false
+  delay_if_still_running: true
+---
+path: ./example.exe
+parameters:
+  - name: --rid
+    value: $RANDOM_ID
+  - name: --name
+    value: tester
+  - name: --development
+    value: ""
+```
+
+and the config will be parsed like running on the command line as below:
+
+```cmd
+./example.exe --rid=c79e9307lsqjbn6vbmd0 --name=tester --development
+```
 
 ## Flag
 
@@ -100,55 +183,3 @@ The value with prefix '*$*' is reserved for the system value as the following ta
 | value | comment |
 | --- | --- |
 | `$RANDOM_ID` | A 20-length of the random value. It is useful to track the session scope. |
-
-## Job
-
-### HTTP Job
-
-Each HTTP job will send a POST request to the specified URI,
-headers of the request are:
-
-| Header | Value |
-| --- | --- |
-| Content-Type | application/json |
-
-and the config of [Job Parameter Object](#job-parameter-object) will be parsed as a JSON-form request body.
-
-For example, there is a config like:
-
-```yaml
----
-name: example-http-job
-type: http
-cron:
-  express: "* * * * * *"
-  skip_if_still_running: false
-  delay_if_still_running: true
----
-uri: http://localhost/example
-parameters:
-  - name: rid
-    value: $RANDOM_ID
-  - name: name
-    value: tester
-  - name: param
-    value: "123"
-```
-
-parameters will be parse as JSON like:
-
-```json
-{
-  "rid": "$RANDOM_ID",
-  "name": "tester",
-  "param": "123"
-}
-```
-
-and send to `http://localhost/example`.
-
-**CAUTION**: If there are 2 or above of the **SAME** name of [Job Parameter Object](#job-parameter-object), Owl would take the **LAST** one value.
-
-### File Job
-
-File job runs an executable file with flags(if any).
