@@ -11,6 +11,7 @@ import (
 
 	flags "github.com/jessevdk/go-flags"
 	"github.com/n101661/owl/pkg/cron"
+	_ "github.com/n101661/owl/pkg/cron/jobs/files"
 	_ "github.com/n101661/owl/pkg/cron/jobs/http"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

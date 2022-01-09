@@ -55,7 +55,7 @@ func Test_Cron(t *testing.T) {
 name: test-job
 type: test
 cron:
-    express: "* * * * *"
+    express: "* * * * * *"
     skip_if_still_running: true
     delay_if_still_running: true
 ---
@@ -73,7 +73,7 @@ values:
 name: test-job
 type: test
 cron:
-    express: "* * * * *"
+    express: "* * * * * *"
     skip_if_still_running: true
     delay_if_still_running: true
 `
@@ -86,7 +86,7 @@ cron:
 name: test-job
 type: unknown
 cron:
-    express: "* * * * *"
+    express: "* * * * * *"
     skip_if_still_running: true
     delay_if_still_running: true
 ---

@@ -7,8 +7,6 @@ import (
 
 	cron "github.com/robfig/cron/v3"
 	yaml "gopkg.in/yaml.v3"
-
-	"github.com/n101661/owl/pkg/cron/configs"
 )
 
 var (
@@ -50,7 +48,7 @@ func NewCron() *Cron {
 }
 
 func (c *Cron) AddFromFile(r io.Reader) error {
-	var cfg configs.Config
+	var cfg Config
 
 	decoder := yaml.NewDecoder(r)
 	if err := decoder.Decode(&cfg); err != nil {

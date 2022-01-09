@@ -38,7 +38,7 @@ func Test_jobBuilder_Build(t *testing.T) {
 
 		j, err := builder.Build("test", &Config{
 			URI: s.URL,
-			Parameters: []Parameter{
+			Parameters: []cron.Parameter{
 				{Name: "id", Value: cron.RandomID},
 				{Name: "a", Value: "aaa"},
 				{Name: "b", Value: "bbb"},

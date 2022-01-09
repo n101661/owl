@@ -3,9 +3,10 @@
 Owl is a server to schedule jobs.
 Owl takes advantage of CRON expression to config jobs.
 
-Owl jobs support:
+Owl supports:
 
-- [http](#http-job) called
+- [HTTP Job](#http-job)
+- [File Job](#file-job)
 
 ## Flag
 
@@ -24,7 +25,7 @@ There are two documents in the configuration file:
 | Index Of Document | Type | Description |
 | --- | --- | --- |
 | 0 | [Job Header Document](#job-header-document) | **REQUIRED**. |
-| 1 | [HTTP Job Config Document](#http-job-config-document) | **REQUIRED**. Define how to execute the job. The type of the document depends on the value of the `type` field in [index-0 document](#job-header-document). |
+| 1 | [HTTP Job Config Document](#http-job-config-document) \| [File Job Config Document](#file-job-config-document) | **REQUIRED**. Define how to execute the job. The type of the document depends on the value of the `type` field in [index-0 document](#job-header-document). |
 
 ## Config Example
 
@@ -52,7 +53,7 @@ Fixed fields:
 | Field Name | Type | Description |
 | --- | --- | --- |
 | name | string | **REQUIRED**. The name of the job. |
-| type | string | **REQUIRED**. The available values are '*http*'. |
+| type | string | **REQUIRED**. The available values are '*http*', '*files*'. |
 | cron | [CRON Config Object](#cron-config-object) | The CRON setting. |
 
 ### CRON Config Object
@@ -72,27 +73,27 @@ Fixed fields:
 | Field Name | Type | Description |
 | --- | --- | --- |
 | uri | string | **REQUIRED**. |
-| parameters | \[\][HTTP Parameter Object](#http-parameter-object) | Parameters are sent as a JSON-form request body. |
+| parameters | \[\][Job Parameter Object](#job-parameter-object) | Parameters are sent as a JSON-form request body. |
 
-<!-- ### File Job Config Object
+### File Job Config Document
 
 Fixed fields:
 
 | Field Name | Type | Description |
 | --- | --- | --- |
 | path | string | **REQUIRED**. An executable file path. |
-| flags | \[\][Job Config Value Object](#job-config-value-object) | Set the given flags if any. | -->
+| parameters | \[\][Job Parameter Object](#job-parameter-object) | Set the given flags if any. |
 
-### HTTP Parameter Object
+### Job Parameter Object
 
 Fixed fields:
 
 | Field Name | Type | Description |
 | --- | --- | --- |
 | name | string | **REQUIRED**. The given name of the parameter. |
-| value | string | **REQUIRED**. See [HTTP Parameter Value List](#http-parameter-value-list) for details. |
+| value | string | **REQUIRED**. See [Job Parameter Value List](#job-parameter-value-list) for details. |
 
-### HTTP Parameter Value List
+### Job Parameter Value List
 
 The value with prefix '*$*' is reserved for the system value as the following table:
 
@@ -111,7 +112,7 @@ headers of the request are:
 | --- | --- |
 | Content-Type | application/json |
 
-and the config of [HTTP Parameter Object](#http-parameter-object) will be parsed as a JSON-form request body.
+and the config of [Job Parameter Object](#job-parameter-object) will be parsed as a JSON-form request body.
 
 For example, there is a config like:
 
@@ -146,4 +147,8 @@ parameters will be parse as JSON like:
 
 and send to `http://localhost/example`.
 
-**CAUTION**: If there are 2 or above of the **SAME** name of [HTTP Parameter Object](#http-parameter-object), Owl would take the **LAST** one value.
+**CAUTION**: If there are 2 or above of the **SAME** name of [Job Parameter Object](#job-parameter-object), Owl would take the **LAST** one value.
+
+### File Job
+
+File job runs an executable file with flags(if any).
